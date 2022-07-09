@@ -156,7 +156,7 @@ const Index: NextPage<{
         <br />
         {searchQuery != null ? (
           <>
-            <p>showing results for "{searchQuery}"...</p>
+            <p>showing results for &quot;{searchQuery}&quot;...</p>
             <a
               className="underline cursor-pointer"
               onClick={() => {
@@ -262,6 +262,7 @@ const Index: NextPage<{
                                 window.location.href =
                                   item.attachmentUrl as string;
                               }}
+                              alt="Attachment"
                             />
                           </div>
                         </div>
