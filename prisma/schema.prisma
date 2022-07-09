@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Store attachments.
+model Attachment {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  contents  Bytes
+
+  // Foreign key to the log which created this attachment.
+  Logs Log[]
+}
+
+// Store logs.
+model Log {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  message   String? // Can be optional if attachment is non-null.
+
+  // Store the attachment, if we have one.
+  Attachment   Attachment? @relation(fields: [attachmentId], references: [id])
+  attachmentId String?
+}
