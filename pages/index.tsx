@@ -1,11 +1,7 @@
 import * as React from "react";
 import { ChatAltIcon, PhotographIcon } from "@heroicons/react/solid";
 import prisma from "lib/prisma";
-import type {
-  GetServerSideProps,
-  InferGetServerSidePropsType,
-  NextPage,
-} from "next";
+import type { GetServerSideProps, NextPage } from "next";
 import operand from "lib/operand";
 import { useRouter } from "next/router";
 

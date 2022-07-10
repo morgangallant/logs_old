@@ -26,4 +26,25 @@ model Log {
   // Store the attachment, if we have one.
   Attachment   Attachment? @relation(fields: [attachmentId], references: [id])
   attachmentId String?
+
+  // Logs can create associated events.
+  Events Event[]
+}
+
+// An enumeration over the various supported event types.
+// Naming is hard...
+enum EventType {
+  GOOD_MORNING
+  GOOD_NIGHT
+  ATE_OR_DRANK
+}
+
+// Keep track of events that happen. I.e. going to bed, waking up, etc.
+// These events are extracted from log messages.
+model Event {
+  id    String    @id @default(cuid())
+  Log   Log       @relation(fields: [logId], references: [id])
+  logId String
+  type  EventType
+  meta  Json // The schema depends on the event type.
 }
