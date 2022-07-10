@@ -296,7 +296,7 @@ const Index: NextPage<{
                         {item.events.length > 0 && (
                           <div className="mt-2">
                             <p className="text-sm text-gray-700">
-                              <strong>Extracted events:</strong>
+                              <strong>Extracted:</strong>
                             </p>
                             <ul className="mt-2">
                               {item.events.map((e, i) => (
