@@ -4,6 +4,7 @@ import prisma from "lib/prisma";
 import type { GetServerSideProps, NextPage } from "next";
 import operand from "lib/operand";
 import { useRouter } from "next/router";
+import { EventType } from "@prisma/client";
 
 /**
  * LogObj is a type for the Log object.
@@ -16,6 +17,10 @@ type LogObj = {
     attachmentId: string | null;
   };
   AttachmentURL: string | null;
+  Events: {
+    type: EventType;
+    meta: any;
+  }[];
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -47,6 +52,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
               id: true,
             },
           },
+          Events: true,
         },
       });
       if (log) {
@@ -60,6 +66,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           AttachmentURL: log.Attachment
             ? `/api/attachment/${log.Attachment.id}`
             : null,
+          Events: log.Events.map((e) => ({
+            type: e.type,
+            meta: e.meta,
+          })),
         });
       }
     }
@@ -82,6 +92,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           id: true,
         },
       },
+      Events: true,
     },
     // Show the newest logs first.
     orderBy: {
@@ -102,6 +113,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         AttachmentURL: log.Attachment
           ? `/api/attachment/${log.Attachment.id}`
           : null,
+        Events: log.Events.map((e) => ({
+          type: e.type,
+          meta: e.meta,
+        })),
       })) as LogObj[],
       searchQuery: null,
     },
@@ -117,6 +132,10 @@ type Item = {
   date: number;
   message: string | null;
   attachmentUrl: string | null;
+  events: {
+    type: EventType;
+    meta: any;
+  }[];
 };
 
 // Index is the main page of the app.
@@ -141,9 +160,58 @@ const Index: NextPage<{
         date: log.Log.createdAt,
         message: log.Log.message,
         attachmentUrl: log.AttachmentURL,
+        events: log.Events,
       }))
     );
   }, [logs]);
+
+  // Render an event.
+  const renderEvent = (event: {
+    type: EventType;
+    meta: any;
+    occuredAt: number;
+  }) => {
+    switch (event.type) {
+      case "GOOD_MORNING":
+        return <p className="text-sm text-gray-700">Woke up.</p>;
+      case "GOOD_NIGHT":
+        return <p className="text-sm text-gray-700">Went to bed.</p>;
+      case "ATE_OR_DRANK":
+        console.log(event.meta);
+        // This is a food item, so we can render a thumbnail, it's name,
+        // a small summary of nutritional information.
+        return (
+          <div className="flex flex-col">
+            <div className="flex flex-row">
+              {event.meta.photo && (
+                <img
+                  className="h-8 w-8 rounded-full"
+                  src={event.meta.photo.thumb}
+                  alt="Food thumbnail"
+                />
+              )}
+              <div className="flex-1">
+                <p className="text-sm text-gray-700">
+                  {event.meta.food_name} ({event.meta.serving_qty}{" "}
+                  {event.meta.serving_unit})
+                </p>
+                <p className="text-sm text-gray-700">
+                  {event.meta.nf_calories} cals, {event.meta.nf_total_fat}g fat,{" "}
+                  {event.meta.nf_total_carbohydrate}g carbs,{" "}
+                  {event.meta.nf_protein}g protein
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return (
+          <p className="text-sm text-gray-700">
+            Unknown event type: {event.type}
+          </p>
+        );
+    }
+  };
 
   return (
     <div className="sm:container mx-auto px-4">
@@ -225,6 +293,23 @@ const Index: NextPage<{
                         <div className="mt-2 text-sm text-gray-700">
                           <p>{item.message}</p>
                         </div>
+                        {item.events.length > 0 && (
+                          <div className="mt-2">
+                            <p className="text-sm text-gray-700">
+                              <strong>Extracted events:</strong>
+                            </p>
+                            <ul className="mt-2">
+                              {item.events.map((e, i) => (
+                                <li key={i}>
+                                  {renderEvent({
+                                    ...e,
+                                    occuredAt: item.date,
+                                  })}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </div>
                     </>
                   ) : (
