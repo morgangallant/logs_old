@@ -53,7 +53,7 @@ type FileResponse = {
 /**
  * NewEvent is a utility type for creating a new event.
  */
-type NewEvent = { type: EventType; meta?: any };
+type NewEvent = { type: EventType; meta: any };
 
 /**
  * An extractor is a function which takes a message from a user and extracts
@@ -70,6 +70,7 @@ const gmExtractor: Extractor = async (message) => {
   return [
     {
       type: "GOOD_MORNING",
+      meta: {},
     },
   ];
 };
@@ -82,6 +83,7 @@ const gnExtractor: Extractor = async (message) => {
   return [
     {
       type: "GOOD_NIGHT",
+      meta: {},
     },
   ];
 };
